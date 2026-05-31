@@ -1,3 +1,4 @@
+
 import os
 import time
 from io import BytesIO
@@ -6,6 +7,7 @@ import requests
 from supabase import create_client, Client
 
 # 1. Supabase Connection Configuration
+# Paste your real credentials inside the quotes below
 SUPABASE_URL = "https://rjhutdkynphyvsdbzart.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqaHV0ZGt5bnBoeXZzZGJ6YXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTY3MjksImV4cCI6MjA5MzQzMjcyOX0.4mks3csRQQ4N2IJ33wz8XdoBJw8RcXlN80G1qXAkOPE"
 BUCKET_NAME = "nasa-images"  # Must match your bucket name exactly
@@ -109,30 +111,48 @@ def process_item(data):
 def main():
     print("🚀 INITIALIZING NASA ORIGINAL PIPELINE ENGINE ON RAILWAY STACK...")
     
+    # FIX: Explicit base API URL path definition
+    search_url = "https://nasa.gov"
+    
     with ThreadPoolExecutor(max_workers=5) as executor:  
         for query in QUERIES:
             print(f"\n🚀 Searching: {query}")
-            url = f"https://nasa.gov{query}&media_type=image"
+            
+            # FIX: Clean dictionary formatting instead of string concatenation blocks
+            query_params = {
+                "q": query,
+                "media_type": "image"
+            }
+
+            url = search_url
+            is_first_page = True
 
             while url:
-                print("Processing:", url)
+                print("Processing Endpoint URL Target...")
                 try:
-                    res_raw = requests.get(url, timeout=15)
+                    # FIX: Handle parameters correctly based on whether it's a built URL or next-page pagination string
+                    if is_first_page:
+                        res_raw = requests.get(url, params=query_params, timeout=15)
+                        is_first_page = False
+                    else:
+                        res_raw = requests.get(url, timeout=15)
+                        
                     if res_raw.status_code != 200:
                         print(f"❌ Server rejection during loop step. HTTP Status: {res_raw.status_code}")
                         break
                         
                     res = res_raw.json()
                     items = res.get("collection", {}).get("items", [])
+                    print(f"Unpacked search indexing layer. Found {len(items)} cataloged elements.")
 
                     for item in items:
                         data_list = item.get("data", [])
                         if data_list:
                             # Pass the inner dictionary down to your original filter logic
-                            executor.submit(process_item, data_list[0])
+                            executor.submit(process_item, data_list)
 
                     url = get_next_link(res)
-                    time.sleep(0.3)  # Respectful backoff interval
+                    time.sleep(0.5)  # Safe spacing throttle
                     
                 except Exception as loop_err:
                     print(f"Encountered collection processing boundary error: {loop_err}")
@@ -140,4 +160,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-  
+    
