@@ -6,8 +6,8 @@ import requests
 from supabase import create_client, Client
 
 # 1. Supabase Connection Configuration
-SUPABASE_URL = "https://supabase.co"
-SUPABASE_KEY = "your-supabase-service-role-or-anon-key"
+SUPABASE_URL = "https://rjhutdkynphyvsdbzart.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqaHV0ZGt5bnBoeXZzZGJ6YXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTY3MjksImV4cCI6MjA5MzQzMjcyOX0.4mks3csRQQ4N2IJ33wz8XdoBJw8RcXlN80G1qXAkOPE"
 BUCKET_NAME = "nasa-images"  # Must match your bucket name exactly
 
 # Initialize direct Supabase connection
